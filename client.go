@@ -1,8 +1,11 @@
 package metadialer
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -64,7 +67,22 @@ func (c *MetaHTTPClient) Get(url string) (*http.Response, error) {
 
 // Post is a convenience method for making POST requests
 func (c *MetaHTTPClient) Post(url, contentType string, body interface{}) (*http.Response, error) {
-	return c.Client.Post(url, contentType, nil) // Replace nil with actual body handling
+	// Convert the body interface{} to io.Reader
+	var bodyReader io.Reader
+	if body != nil {
+		switch v := body.(type) {
+		case io.Reader:
+			bodyReader = v
+		case []byte:
+			bodyReader = bytes.NewReader(v)
+		case string:
+			bodyReader = strings.NewReader(v)
+		default:
+			// For other types, convert to string then to reader
+			bodyReader = strings.NewReader(fmt.Sprintf("%v", v))
+		}
+	}
+	return c.Client.Post(url, contentType, bodyReader)
 }
 
 // PostForm is a convenience method for making POST requests with form data
