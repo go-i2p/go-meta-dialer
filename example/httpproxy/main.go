@@ -85,5 +85,4 @@ func main() {
 			log.Println("Response Status:", resp.Status)
 		}(conn)
 	}
-
 }

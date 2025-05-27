@@ -35,6 +35,10 @@ func NewMetaHTTPClient(rootCAs *x509.CertPool) *MetaHTTPClient {
 				}
 
 				// Use standard verification for all other domains
+				if len(state.PeerCertificates) == 0 {
+					return fmt.Errorf("no peer certificates provided")
+				}
+
 				opts := x509.VerifyOptions{
 					DNSName:       state.ServerName,
 					Intermediates: x509.NewCertPool(),
